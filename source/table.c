@@ -50,7 +50,7 @@ find(struct OB_table *t, struct OB_item pivot)
 		   searching for */
 		} else if (   t->table[i].item != deleted
                 && (hash == t->table[i].hash_value)
-		           && t->comp(t->p, t->table[i].item, pivot.item))
+		           && t->comp(t->table[i].item, pivot.item))
 		{
 			result = &t->table[i];
 		}
@@ -63,7 +63,7 @@ find(struct OB_table *t, struct OB_item pivot)
 void **
 OB_table_find(struct OB_table *t, void *el)
 {
-	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
+	struct OB_item pivot = {.item=el, .hash_value=t->hash(el)};
 	struct OB_item*result = find(t, pivot);
 	return (!result->item || result->item == deleted) ? NULL : (&result->item);
 }
@@ -97,7 +97,7 @@ OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item pivot)
 void **
 OB_table_insert_loc(struct OB_table *t, void *el)
 {
-	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
+	struct OB_item pivot = {.item=el, .hash_value=t->hash(el)};
     return OB_table_insert_loc__pivot(t, pivot);
 }
 

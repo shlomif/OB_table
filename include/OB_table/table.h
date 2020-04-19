@@ -14,10 +14,12 @@ struct OB_item {
 };
 
 struct OB_table {
-	size_t (*hash)(union param, const void *);
-	bool (*comp)(union param, const void *, const void *);
+	size_t (*hash)(const void *);
+	bool (*comp)(const void *, const void *);
 	struct OB_item *table;
+#ifndef SHLOMIFY
 	union param p;
+#endif
 	size_t n, cap;
 };
 
