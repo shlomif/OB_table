@@ -31,12 +31,12 @@ OB_table_init(struct OB_table *t, size_t n_hint)
 
 /* Like OB_table_find, but returns first empty on failure (or NULL if saturated)
 */
-static struct OB_item*
-find(struct OB_table *t, void *el)
+static inline struct OB_item*
+find(struct OB_table *t, struct OB_item pivot)
 {
 	size_t tries, i;
 	struct OB_item *result = NULL, *first_empty = NULL;
-    const size_t hash = t->hash(t->p, el);
+    const size_t hash = pivot.hash_value;
 	i = hash % t->cap;
 	for (tries = 0; !result && tries < t->cap; tries++) {
 		/* Remember first empty during search, if any */
@@ -50,7 +50,7 @@ find(struct OB_table *t, void *el)
 		   searching for */
 		} else if (   t->table[i].item != deleted
                 && (hash == t->table[i].hash_value)
-		           && t->comp(t->p, t->table[i].item, el))
+		           && t->comp(t->p, t->table[i].item, pivot.item))
 		{
 			result = &t->table[i];
 		}
@@ -63,7 +63,8 @@ find(struct OB_table *t, void *el)
 void **
 OB_table_find(struct OB_table *t, void *el)
 {
-	struct OB_item*result = find(t, el);
+	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
+	struct OB_item*result = find(t, pivot);
 	return (!result->item || result->item == deleted) ? NULL : (&result->item);
 }
 
@@ -71,7 +72,8 @@ void **
 OB_table_insert_loc(struct OB_table *t, void *el)
 {
 	struct OB_table tc;
-	struct OB_item*loc = find(t, el);
+	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
+	struct OB_item*loc = find(t, pivot);
 	/* Element not exist? */
 	if (!loc || !loc->item || loc->item == deleted) {
 		/* Not enough capacity? */
@@ -85,7 +87,7 @@ OB_table_insert_loc(struct OB_table *t, void *el)
 			}
 			free(t->table);
 			*t = tc;
-			loc = find(t, el);
+			loc = find(t, pivot);
 		}
 		loc->item = el;
 		t->n++;
