@@ -69,11 +69,10 @@ OB_table_find(struct OB_table *t, void *el)
 	return (!result->item || result->item == deleted) ? NULL : (&result->item);
 }
 
-void **
-OB_table_insert_loc(struct OB_table *t, void *el)
+static void **
+OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item pivot)
 {
 	struct OB_table tc;
-	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
 	struct OB_item*loc = find(t, pivot);
 	/* Element not exist? */
 	if (!loc || !loc->item || loc->item == deleted) {
@@ -84,16 +83,23 @@ OB_table_insert_loc(struct OB_table *t, void *el)
 			OB_table_init(&tc, EXPAND_RATIO * (t->n + 1));
 			for (size_t i = 0; i < t->cap; i++) {
 				if (t->table[i].item && t->table[i].item != deleted)
-					OB_table_insert_loc(&tc, t->table[i].item);
+					OB_table_insert_loc__pivot(&tc, t->table[i]);
 			}
 			free(t->table);
 			*t = tc;
 			loc = find(t, pivot);
 		}
-		loc->item = el;
+		loc->item = pivot.item;
 		t->n++;
 	}
 	return &(loc->item);
+}
+
+void **
+OB_table_insert_loc(struct OB_table *t, void *el)
+{
+	struct OB_item pivot = {.item=el, .hash_value=t->hash(t->p, el)};
+    return OB_table_insert_loc__pivot(t, pivot);
 }
 
 void *
