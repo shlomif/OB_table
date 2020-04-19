@@ -1,10 +1,12 @@
 #ifndef VV_OB_TABLE_INCLUDED
 #define VV_OB_TABLE_INCLUDED
 
+#define SHLOMIFY
 #include "util.h"
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 struct OB_table {
 	size_t (*hash)(union param, const void *);
@@ -15,7 +17,11 @@ struct OB_table {
 };
 
 /* Pass t with hash_fn and comp_fn set, zero other members */
+#ifdef SHLOMIFY
+void
+#else
 struct OB_table *
+#endif
 OB_table_init(struct OB_table *t, size_t n_hint);
 
 /* Find element */
@@ -37,7 +43,11 @@ void **
 OB_table_step(struct OB_table *t, void **loc);
 
 /* Deallocates table */
+#ifdef SHLOMIFY
+void
+#else
 struct OB_table *
+#endif
 OB_table_clear(struct OB_table *t);
 
 /* Get number of stored entries in table */
