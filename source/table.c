@@ -31,63 +31,66 @@ OB_table_init(struct OB_table *t, size_t n_hint)
 
 /* Like OB_table_find, but returns first empty on failure (or NULL if saturated)
 */
-static void **
+static struct OB_item*
 find(struct OB_table *t, void *el)
 {
 	size_t tries, i;
-	void **result = NULL, **first_empty = NULL;
-	i = t->hash(t->p, el) % t->cap;
+	struct OB_item *result = NULL, *first_empty = NULL;
+    const size_t hash = t->hash(t->p, el);
+	i = hash % t->cap;
 	for (tries = 0; !result && tries < t->cap; tries++) {
 		/* Remember first empty during search, if any */
-		if (!first_empty && (!t->table[i] || t->table[i] == deleted))
+		if (!first_empty && (!t->table[i].item || t->table[i].item == deleted))
 			first_empty = &t->table[i];
 		/* NULL implies element does not exist */
-		if (!t->table[i]) {
+		if (!t->table[i].item) {
 			result = first_empty ? first_empty : &t->table[i];
+            result->hash_value = hash;
 		/* If there is a non-empty slot check it is actually what we're
 		   searching for */
-		} else if (   t->table[i] != deleted
-		           && t->comp(t->p, t->table[i], el))
+		} else if (   t->table[i].item != deleted
+                && (hash == t->table[i].hash_value)
+		           && t->comp(t->p, t->table[i].item, el))
 		{
 			result = &t->table[i];
 		}
 		/* Next slot */
 		if (++i == t->cap) i = 0;
 	}
-	return result ? result : (first_empty ? first_empty : NULL);
+	return result ? result : (first_empty ? ({first_empty->hash_value = hash; first_empty; }) : NULL);
 }
 
 void **
 OB_table_find(struct OB_table *t, void *el)
 {
-	void **result = find(t, el);
-	return (!*result || *result == deleted) ? NULL : result;
+	struct OB_item*result = find(t, el);
+	return (!result->item || result->item == deleted) ? NULL : (&result->item);
 }
 
 void **
 OB_table_insert_loc(struct OB_table *t, void *el)
 {
 	struct OB_table tc;
-	void **loc = find(t, el);
+	struct OB_item*loc = find(t, el);
 	/* Element not exist? */
-	if (!loc || !*loc || *loc == deleted) {
+	if (!loc || !loc->item || loc->item == deleted) {
 		/* Not enough capacity? */
 		if (EXPAND_RATIO * (t->n + 1) > t->cap) {
 			tc = *t;
 			tc.n = 0;
 			OB_table_init(&tc, MAX(EXPAND_RATIO, 2) * (t->n + 1));
 			for (size_t i = 0; i < t->cap; i++) {
-				if (t->table[i] && t->table[i] != deleted)
-					OB_table_insert_loc(&tc, t->table[i]);
+				if (t->table[i].item && t->table[i].item != deleted)
+					OB_table_insert_loc(&tc, t->table[i].item);
 			}
 			free(t->table);
 			*t = tc;
 			loc = find(t, el);
 		}
-		*loc = el;
+		loc->item = el;
 		t->n++;
 	}
-	return loc;
+	return &(loc->item);
 }
 
 void *
@@ -99,6 +102,7 @@ OB_table_remove_loc(struct OB_table *t, void **loc)
 	return result;
 }
 
+#ifndef SHLOMIFY
 void **
 OB_table_step(struct OB_table *t, void **loc)
 {
@@ -112,6 +116,7 @@ OB_table_step(struct OB_table *t, void **loc)
 	}
 	return result;
 }
+#endif
 
 size_t
 OB_table_len(const struct OB_table *t)

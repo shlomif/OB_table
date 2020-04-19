@@ -8,10 +8,15 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+struct OB_item {
+    void * item;
+    size_t hash_value;
+};
+
 struct OB_table {
 	size_t (*hash)(union param, const void *);
 	bool (*comp)(union param, const void *, const void *);
-	void **table;
+	struct OB_item *table;
 	union param p;
 	size_t n, cap;
 };
