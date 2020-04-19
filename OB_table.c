@@ -1,6 +1,6 @@
 #include "OB_table.h"
 
-#include "assert.h"
+#include "ob_assert.h"
 
 #define START_N      16
 #define EXPAND_RATIO 2
