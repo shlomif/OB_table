@@ -1,5 +1,10 @@
 #include <OB_table/table.h>
+#ifdef SHLOMIFY
+#include <OB_table/util.h>
+#include <assert.h>
+#else
 #include <OB_table/assert.h>
+#endif
 
 #define START_N      16
 #define EXPAND_RATIO 2
@@ -7,13 +12,21 @@
 /* Sentinel for previously occupied table entries */
 static void *const deleted = &(char){0};
 
+#ifdef SHLOMIFY
+void
+#else
 struct OB_table *
+#endif
 OB_table_init(struct OB_table *t, size_t n_hint)
 {
 	if (n_hint) t->cap = n_hint * EXPAND_RATIO;
 	if (t->cap < START_N) t->cap = START_N;
+#ifdef SHLOMIFY
+	t->table = calloc(t->cap, sizeof *t->table);
+#else
 	ASSERT(t->table = calloc(t->cap, sizeof *t->table));
 	return t;
+#endif
 }
 
 /* Like OB_table_find, but returns first empty on failure (or NULL if saturated)
@@ -106,13 +119,19 @@ OB_table_len(const struct OB_table *t)
 	return t->n;
 }
 
+#ifdef SHLOMIFY
+void
+#else
 struct OB_table *
+#endif
 OB_table_clear(struct OB_table *t)
 {
 	free(t->table);
 	t->cap = 0;
 	t->n = 0;
+#ifndef SHLOMIFY
 	return t;
+#endif
 }
 
 void *
