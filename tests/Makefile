@@ -16,7 +16,7 @@ tests: $(TESTS) $(FTESTS)
 	done
 	@echo "=== All tests PASSED ==="
 
-OB_table_test: ../source/table.c ../source/hash.c OB_table_test.c
+OB_table_test: ../source/sentinel.c ../source/table.c ../source/hash.c OB_table_test.c
 	$(LD) $(CFLAGS) -o $@ $^
 
 .PHONY: clean
