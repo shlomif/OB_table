@@ -9,8 +9,8 @@
 #include <stdlib.h>
 
 struct OB_item {
-    void * item;
-    size_t hash_value;
+	void * item;
+	size_t hash_value;
 };
 
 struct OB_table {
