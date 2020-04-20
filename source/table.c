@@ -55,10 +55,15 @@ find(struct OB_table *t, struct OB_item pivot)
 	return result ? result : (first_empty ? ({first_empty->hash_value = hash; first_empty; }) : NULL);
 }
 
-void ** OB_table_find(struct OB_table *t, void *el)
+static struct OB_item OB_el2pivot(struct OB_table *t, void *el)
 {
 	struct OB_item pivot = {.item=el, .hash_value=t->hash(el)};
-	struct OB_item*result = find(t, pivot);
+    return pivot;
+}
+
+void ** OB_table_find(struct OB_table *t, void *el)
+{
+	struct OB_item*result = find(t, OB_el2pivot(t, el));
 	return (!result->item || result->item == OB_deleted) ? NULL : (&result->item);
 }
 
@@ -89,8 +94,7 @@ static void ** OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item piv
 
 void ** OB_table_insert_loc(struct OB_table *t, void *el)
 {
-	struct OB_item pivot = {.item=el, .hash_value=t->hash(el)};
-    return OB_table_insert_loc__pivot(t, pivot);
+    return OB_table_insert_loc__pivot(t, OB_el2pivot(t, el));
 }
 
 void * OB_table_remove_loc(struct OB_table *t, void **loc)
