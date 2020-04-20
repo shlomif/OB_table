@@ -20,11 +20,20 @@ foreach my $src ( "OB_sentinel.c", "OB_table.c", "OB_table.h" )
 
     $dest_p->touchpath->spew_utf8(
         map {
-            /\A\#/
-                ? $_
-                : s/\A((SHRET|void *\*( *\*)?|struct OB_item *\*|size_t) *(OB\w+)\()/static $1/gr
-                =~ s/\b(OB_)/$prefix$1/gr =~
-                s/t\-\>hash\(el\)/fcs_states_myhash(el)/gr;
+            my $s = (
+                /\A\#/
+                ? (
+                      /\A#include "OB_table.h"/
+                    ? "#include \"states_ob/OB_table.h\"\n"
+                    : $_
+                    )
+                : (
+s/\A((SHRET|void *\*( *\*)?|struct OB_item *\*|size_t) *(OB\w+)\()/static $1/gr
+                        =~ s/\b(OB_)/$prefix$1/gr =~
+                        s/t\-\>hash\(el\)/fcs_states_myhash(el)/gr )
+            );
+            $s =~ s/\b(VV_)/$1_$prefix$1/g;
+            $s
         } $src_p->lines_utf8
     );
 }
