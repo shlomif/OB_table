@@ -6,9 +6,8 @@
 #include <OB_table/util.h>
 #include <OB_table/assert.h>
 
-static bool comp(union param p, const void *s1, const void *s2)
+static bool comp(const void *s1, const void *s2)
 {
-	UNUSED(p);
 	return !strcmp(s1, s2);
 }
 
@@ -20,7 +19,7 @@ int main(void)
 		.hash = FNV_1a_hash,
 		.comp = comp
 	};
-	void **l;
+	struct OB_item *l;
 	char *strs, *str;
 	size_t i, j;
 

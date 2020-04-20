@@ -110,21 +110,19 @@ OB_table_remove_loc(struct OB_table *t, void **loc)
 	return result;
 }
 
-#ifndef SHLOMIFY
-void **
-OB_table_step(struct OB_table *t, void **loc)
+struct OB_item *
+OB_table_step(struct OB_table *t, struct OB_item *loc)
 {
-	void **result = NULL;
+	struct OB_item *result = NULL;
 	size_t i = 0;
 	if (loc) i = loc - t->table + 1;
 	for (; !result && i < t->cap; i++) {
-		if (t->table[i] && t->table[i] != deleted) {
+		if (t->table[i].item && t->table[i].item != deleted) {
 			result = &t->table[i];
 		}
 	}
 	return result;
 }
-#endif
 
 size_t
 OB_table_len(const struct OB_table *t)

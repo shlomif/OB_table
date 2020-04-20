@@ -22,13 +22,11 @@ typedef size_t FNV_1a_calc_t;
 typedef uint_least32_t FNV_1a_calc_t;
 #endif
 
-size_t FNV_1a_hash(union param p, const void *s)
+size_t FNV_1a_hash(const void *s)
 {
 	FNV_1a_calc_t result = FNV_1a_offset_basis;
 	const char *str = s;
 	size_t i;
-
-	UNUSED(p);
 
 	for (i = 0; str[i]; i++) {
 		result ^= str[i];

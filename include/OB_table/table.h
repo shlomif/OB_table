@@ -46,8 +46,8 @@ OB_table_remove_loc(struct OB_table *t, void **loc);
 
 /* Step through all locators (loc = previous locator or NULL to get first
  * locator) */
-void **
-OB_table_step(struct OB_table *t, void **loc);
+struct OB_item *
+OB_table_step(struct OB_table *t, struct OB_item *loc);
 
 /* Deallocates table */
 #ifdef SHLOMIFY
