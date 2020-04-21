@@ -25,8 +25,8 @@ foreach
             my $s = (
                 /\A\#/
                 ? (
-                      /\A#include <OB_table\/table\.h>\z/
-                    ? "#include \"states_ob/include/OB_table.h\"\n"
+                      /\A#include <OB_table\/table\.h>/
+                    ? "#include \"states_ob/include/OB_table/table.h\"\n"
                     : $_
                     )
                 : (
