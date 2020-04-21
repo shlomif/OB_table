@@ -11,7 +11,7 @@ static bool comp(const void *s1, const void *s2)
 	return !strcmp(s1, s2);
 }
 
-#define N_STRS 400000
+#define N_STRS (4 * 128 * 1024)
 
 int main(void)
 {

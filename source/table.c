@@ -31,7 +31,11 @@ static inline struct OB_item* OB_find_helper(struct OB_table *t, struct OB_item 
 	size_t tries, i;
 	struct OB_item *result = NULL, *first_empty = NULL;
 	const size_t hash = pivot.hash_value;
+#ifdef SHLOMIFY_BITWISE
+	i = hash & (t->cap - 1);
+#else
 	i = hash % t->cap;
+#endif
 	for (tries = 0; !result && tries < t->cap; tries++) {
 		/* Remember first empty during search, if any */
 		if (!first_empty && (!t->table[i].item || t->table[i].item == OB_deleted))
@@ -76,7 +80,11 @@ static void ** OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item piv
 		if (EXPAND_RATIO * (t->n + 1) > t->cap) {
 			tc = *t;
 			tc.n = 0;
+#ifdef SHLOMIFY_BITWISE
+			OB_table_init(&tc, (t->cap) << 1);
+#else
 			OB_table_init(&tc, MAX(EXPAND_RATIO, 2) * (t->n + 1));
+#endif
 			for (size_t i = 0; i < t->cap; i++) {
 				if (t->table[i].item && t->table[i].item != OB_deleted)
 					OB_table_insert_loc__pivot(&tc, t->table[i]);
