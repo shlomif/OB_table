@@ -81,7 +81,7 @@ static void ** OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item piv
 			tc = *t;
 			tc.n = 0;
 #ifdef SHLOMIFY_BITWISE
-			OB_table_init(&tc, (t->cap) << 1);
+			OB_table_init(&tc, (t->cap));
 #else
 			OB_table_init(&tc, MAX(EXPAND_RATIO, 2) * (t->n + 1));
 #endif
