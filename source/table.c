@@ -14,8 +14,12 @@ extern void *const OB_deleted;
 
 SHRET OB_table_init(struct OB_table *t, size_t n_hint)
 {
+#ifdef SHLOMIFY
+	t->cap = n_hint;
+#else
 	if (n_hint) t->cap = n_hint * EXPAND_RATIO;
 	if (t->cap < START_N) t->cap = START_N;
+#endif
 #ifdef SHLOMIFY
 	t->table = calloc(t->cap, sizeof *t->table);
 #else
@@ -77,18 +81,28 @@ static void ** OB_table_insert_loc__pivot(struct OB_table *t, struct OB_item piv
 	/* Element not exist? */
 	if (!loc || !loc->item || loc->item == OB_deleted) {
 		/* Not enough capacity? */
-		if (EXPAND_RATIO * (t->n + 1) > t->cap) {
+#define CAP_VAR
+#ifdef CAP_VAR
+		const size_t cap = t->cap;
+#else
+#define cap (t->cap)
+#endif
+		if (EXPAND_RATIO * (t->n + 1) > cap) {
 			tc = *t;
 			tc.n = 0;
 #ifdef SHLOMIFY_BITWISE
-			OB_table_init(&tc, (t->cap));
+			OB_table_init(&tc, (cap) << 1);
 #else
 			OB_table_init(&tc, MAX(EXPAND_RATIO, 2) * (t->n + 1));
 #endif
-			for (size_t i = 0; i < t->cap; i++) {
+			for (size_t i = 0; i < cap; i++) {
 				if (t->table[i].item && t->table[i].item != OB_deleted)
 					OB_table_insert_loc__pivot(&tc, t->table[i]);
 			}
+#ifdef CAP_VAR
+#else
+#undef cap
+#endif
 			free(t->table);
 			*t = tc;
 			loc = OB_find_helper(t, pivot);
