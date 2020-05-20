@@ -14,8 +14,10 @@ struct OB_item {
 };
 
 struct OB_table {
+#ifndef SHLOMIFY
 	size_t (*hash)(const void *);
 	bool (*comp)(const void *, const void *);
+#endif
 	struct OB_item *table;
 #ifndef SHLOMIFY
 	union param p;

@@ -32,9 +32,16 @@ foreach
                 : (
 s/\A((SHRET|void *\*( *\*)?|struct OB_item *\*|size_t) *(OB\w+)\()/static $1/gr
                         =~ s/\b(OB_)/$prefix$1/gr =~
-                        s/t\-\>hash\(el\)/fcs_states_myhash(el)/gr )
+                        s/t\-\>hash\(el\)/fcs_states_myhash(el)/gr =~
+                        s/t\-\>comp\(/fcs_states_ob_mycompare(/gr )
             );
             $s =~ s/\b(VV_)/$1_$prefix$1/g;
+            if ( $src =~ /table\.c/ )
+            {
+                $s =
+qq%#include "state.h"\n#define fcs_states_ob_mycompare(a, b) (!fc_solve_state_compare((a), (b)))\n\n%
+                    . $s;
+            }
             $s
         } $src_p->lines_utf8
     );
