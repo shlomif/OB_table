@@ -38,8 +38,9 @@ s/\A((SHRET|void *\*( *\*)?|struct OB_item *\*|size_t) *(OB\w+)\()/static $1/gr
             $s =~ s/\b(VV_)/$1_$prefix$1/g;
             if ( $src =~ /table\.c/ )
             {
+                my $NOT_NEEDED = qq%#include "state.h"\n%;
                 $s =
-qq%#include "state.h"\n#define fcs_states_ob_mycompare(a, b) (!fc_solve_state_compare((a), (b)))\n\n%
+qq%#define fcs_states_ob_mycompare(a, b) (!fc_solve_state_compare((a), (b)))\n\n%
                     . $s;
             }
             $s
